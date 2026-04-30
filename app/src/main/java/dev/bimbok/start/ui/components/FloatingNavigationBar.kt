@@ -80,7 +80,7 @@ private fun RowScope.NavItem(
     onClick: () -> Unit
 ) {
     val iconSize by animateDpAsState(if (isSelected) 28.dp else 24.dp, label = "size")
-    val color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+    val color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
     
     Box(
         modifier = Modifier
@@ -101,7 +101,9 @@ private fun RowScope.NavItem(
                     .fillMaxSize()
                     .clip(CircleShape)
                     .background(
-                        brush = Brush.linearGradient(GlossyGradient)
+                        brush = Brush.linearGradient(
+                            colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary)
+                        )
                     )
             )
         }

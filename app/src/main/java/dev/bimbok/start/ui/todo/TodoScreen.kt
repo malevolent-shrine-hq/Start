@@ -3,6 +3,7 @@ package dev.bimbok.start.ui.todo
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,20 +17,22 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.bimbok.start.R
 import dev.bimbok.start.data.local.entities.Task
 import dev.bimbok.start.ui.components.ShimmerItem
 import dev.bimbok.start.ui.components.TaskItem
 import dev.bimbok.start.ui.theme.GlossyGradient
-import dev.bimbok.start.ui.theme.LogoFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,13 +59,14 @@ fun TodoScreen(
                 CenterAlignedTopAppBar(
                     title = { 
                         Text(
-                            "Start",
+                            "START",
                             style = MaterialTheme.typography.displayLarge.copy(
-                                fontFamily = LogoFontFamily,
-                                fontSize = 52.sp,
+                                fontWeight = FontWeight.Black,
+                                fontSize = 42.sp,
+                                letterSpacing = 4.sp,
                                 brush = Brush.linearGradient(GlossyGradient)
                             )
-                        ) 
+                        )
                     },
                     scrollBehavior = scrollBehavior,
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -138,7 +142,7 @@ fun TodoScreen(
                     }
                 }
 
-                // Custom Glossy FAB
+                // Custom Retro Terminal FAB
                 Surface(
                     onClick = { 
                         editingTask = null
@@ -149,20 +153,18 @@ fun TodoScreen(
                         .padding(end = 24.dp, bottom = 120.dp)
                         .size(64.dp),
                     shape = CircleShape,
-                    color = Color.Transparent,
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f)),
+                    color = MaterialTheme.colorScheme.secondary, // Soft terminal yellow
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.2f)),
                     shadowElevation = 12.dp
                 ) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Brush.linearGradient(GlossyGradient)),
+                        modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             Icons.Default.Add, 
                             contentDescription = "Add Task",
-                            tint = Color.White,
+                            tint = MaterialTheme.colorScheme.onSecondary,
                             modifier = Modifier.size(32.dp)
                         )
                     }
@@ -201,10 +203,10 @@ fun EmptyState() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            "Nothing started yet.",
-            style = MaterialTheme.typography.displayLarge.copy(
-                fontFamily = LogoFontFamily,
-                fontSize = 46.sp,
+            "NO TASKS FOUND",
+            style = MaterialTheme.typography.displaySmall.copy(
+                fontWeight = FontWeight.Black,
+                letterSpacing = 2.sp,
                 brush = Brush.linearGradient(GlossyGradient)
             )
         )
@@ -235,15 +237,15 @@ fun TaskBottomSheet(
         shape = MaterialTheme.shapes.extraLarge,
         containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f), 
         tonalElevation = 0.dp,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = Color.White.copy(alpha = 0.3f)) },
-        scrimColor = Color.Black.copy(alpha = 0.4f),
+        dragHandle = { BottomSheetDefaults.DragHandle(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)) },
+        scrimColor = Color.Black.copy(alpha = 0.6f),
     ) {
         Surface(
             color = Color.Transparent,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 24.dp),
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)),
             shape = MaterialTheme.shapes.extraLarge
         ) {
             Column(
@@ -253,16 +255,17 @@ fun TaskBottomSheet(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 Text(
-                    if (task == null) "Start New" else "Edit Task",
+                    if (task == null) "START NEW" else "EDIT TASK",
                     style = if (task == null) {
-                        MaterialTheme.typography.headlineLarge.copy(
-                            fontFamily = LogoFontFamily,
-                            fontSize = 38.sp,
+                        MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp,
                             brush = Brush.linearGradient(GlossyGradient)
                         )
                     } else {
                         MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -278,9 +281,9 @@ fun TaskBottomSheet(
                         focusedTextColor = MaterialTheme.colorScheme.onSurface,
                         unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                         focusedLabelColor = MaterialTheme.colorScheme.primary,
-                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     )
                 )
 
@@ -294,9 +297,9 @@ fun TaskBottomSheet(
                         focusedTextColor = MaterialTheme.colorScheme.onSurface,
                         unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                         focusedLabelColor = MaterialTheme.colorScheme.primary,
-                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     )
                 )
 
@@ -314,18 +317,12 @@ fun TaskBottomSheet(
                     contentPadding = PaddingValues(16.dp)
                 ) {
                     Text(
-                        if (task == null) "Start" else "Save",
-                        style = if (task == null) {
-                            MaterialTheme.typography.titleLarge.copy(
-                                fontFamily = LogoFontFamily,
-                                color = Color.White
-                            )
-                        } else {
-                            MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
+                        if (task == null) "START" else "SAVE",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 2.sp,
+                            color = Color.White
+                        )
                     )
                 }
             }

@@ -1,5 +1,6 @@
 package dev.bimbok.start.ui
 
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -80,7 +81,31 @@ fun MainScreen() {
             NavHost(
                 navController = navController,
                 startDestination = Screen.Tasks.route,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                enterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(500, easing = FastOutSlowInEasing)
+                    ) + fadeIn(animationSpec = tween(500))
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it },
+                        animationSpec = tween(500, easing = FastOutSlowInEasing)
+                    ) + fadeOut(animationSpec = tween(500))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { -it },
+                        animationSpec = tween(500, easing = FastOutSlowInEasing)
+                    ) + fadeIn(animationSpec = tween(500))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(500, easing = FastOutSlowInEasing)
+                    ) + fadeOut(animationSpec = tween(500))
+                }
             ) {
                 composable(Screen.Tasks.route) {
                     TodoScreen()
@@ -111,3 +136,4 @@ fun MainScreen() {
         }
     }
 }
+

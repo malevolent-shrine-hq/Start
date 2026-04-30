@@ -10,7 +10,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.bimbok.start.ui.theme.GlossyGradient
-import dev.bimbok.start.ui.theme.LogoFontFamily
 
 @Composable
 fun TagsScreen() {
@@ -20,10 +19,10 @@ fun TagsScreen() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                "Tags",
+                "TAGS",
                 style = MaterialTheme.typography.displayLarge.copy(
-                    fontFamily = LogoFontFamily,
-                    fontSize = 52.sp,
+                    fontSize = 42.sp,
+                    letterSpacing = 4.sp,
                     brush = Brush.linearGradient(GlossyGradient)
                 )
             )

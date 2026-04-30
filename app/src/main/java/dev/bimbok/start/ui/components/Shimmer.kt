@@ -3,6 +3,7 @@ package dev.bimbok.start.ui.components
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,9 +18,9 @@ fun ShimmerItem(
     modifier: Modifier = Modifier
 ) {
     val shimmerColors = listOf(
-        Color.White.copy(alpha = 0.3f),
-        Color.White.copy(alpha = 0.1f),
-        Color.White.copy(alpha = 0.3f),
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
     )
 
     val transition = rememberInfiniteTransition(label = "shimmer")
@@ -42,7 +43,7 @@ fun ShimmerItem(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = Shapes.medium,
-        color = Color.White.copy(alpha = 0.1f)
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Box(
