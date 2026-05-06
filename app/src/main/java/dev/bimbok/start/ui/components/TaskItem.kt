@@ -12,12 +12,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import dev.bimbok.start.data.local.dao.TaskWithSubtasksAndTags
-import dev.bimbok.start.ui.theme.GlassBorder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,38 +72,39 @@ fun TaskItem(
     ) {
         Surface(
             onClick = onClick,
-            shape = MaterialTheme.shapes.large, // Curvier tiles
-            // Glassmorphism effect
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),
+            shape = MaterialTheme.shapes.large,
+            // Solid Retro Terminal Surface
+            color = MaterialTheme.colorScheme.surface,
             border = BorderStroke(
                 width = 1.dp,
-                color = GlassBorder
+                color = MaterialTheme.colorScheme.outline
             ),
-            tonalElevation = 0.dp,
+            tonalElevation = 2.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
                 modifier = Modifier
-                    .padding(horizontal = 20.dp, vertical = 16.dp)
+                    .padding(horizontal = 20.dp, vertical = 20.dp)
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Checkbox(
                     checked = task.isCompleted,
                     onCheckedChange = onToggleCompletion,
+                    modifier = Modifier.scale(1.2f), // Scaled up for satisfaction
                     colors = CheckboxDefaults.colors(
                         checkedColor = MaterialTheme.colorScheme.primary,
-                        uncheckedColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                        uncheckedColor = MaterialTheme.colorScheme.outline
                     )
                 )
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(20.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = task.title,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Black, // Bold geometric feel
                         textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null,
                         color = if (task.isCompleted) 
                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f) 
@@ -112,9 +113,9 @@ fun TaskItem(
                     if (task.description.isNotEmpty()) {
                         Text(
                             text = task.description,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodySmall, // Recedes into background
                             maxLines = 2,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                         )
                     }
                 }
@@ -123,10 +124,12 @@ fun TaskItem(
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Edit Task",
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f), // Subtle grey
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
         }
     }
 }
+

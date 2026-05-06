@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import dev.bimbok.start.ui.navigation.navItems
 import dev.bimbok.start.ui.theme.GlossyGradient
-import dev.bimbok.start.ui.theme.GlassBorder
 
 @Composable
 fun FloatingNavigationBar(
@@ -43,18 +42,19 @@ fun FloatingNavigationBar(
             contentAlignment = Alignment.BottomCenter
         ) {
             Surface(
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f),
+                color = MaterialTheme.colorScheme.surface, // Solid, elevated surface
                 shape = CircleShape,
-                border = BorderStroke(1.dp, GlassBorder),
-                shadowElevation = 0.dp,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                tonalElevation = 8.dp,
+                shadowElevation = 16.dp,
                 modifier = Modifier
-                    .height(80.dp)
+                    .height(72.dp)
                     .widthIn(max = 420.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = 12.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -80,13 +80,13 @@ private fun RowScope.NavItem(
     onClick: () -> Unit
 ) {
     val iconSize by animateDpAsState(if (isSelected) 28.dp else 24.dp, label = "size")
-    val color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+    // High-contrast accent for active state (Retro Green/Aqua)
+    val color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
     
     Box(
         modifier = Modifier
             .weight(1f)
-            .height(48.dp)
-            .padding(horizontal = 4.dp)
+            .fillMaxHeight()
             .clip(CircleShape)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
@@ -95,19 +95,6 @@ private fun RowScope.NavItem(
             ),
         contentAlignment = Alignment.Center
     ) {
-        if (isSelected) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(CircleShape)
-                    .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary)
-                        )
-                    )
-            )
-        }
-        
         Icon(
             imageVector = icon,
             contentDescription = label,
