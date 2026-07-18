@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,6 +47,7 @@ fun TodoScreen(
     val haptic = LocalHapticFeedback.current
     var showBottomSheet by remember { mutableStateOf(false) }
     var editingTask by remember { mutableStateOf<Task?>(null) }
+    var isViewMode by remember { mutableStateOf(false) }
     
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -129,9 +132,14 @@ fun TodoScreen(
                                         },
                                         onEdit = { 
                                             editingTask = taskWithTags.task
+                                            isViewMode = false
                                             showBottomSheet = true
                                         },
-                                        onClick = { /* Detail */ }
+                                        onClick = { 
+                                            editingTask = taskWithTags.task
+                                            isViewMode = true
+                                            showBottomSheet = true
+                                        }
                                     )
                                 }
                             }
@@ -146,6 +154,7 @@ fun TodoScreen(
                 Surface(
                     onClick = { 
                         editingTask = null
+                        isViewMode = false
                         showBottomSheet = true 
                     },
                     modifier = Modifier
@@ -175,10 +184,13 @@ fun TodoScreen(
         if (showBottomSheet) {
             TaskBottomSheet(
                 task = editingTask,
+                isViewMode = isViewMode,
                 onDismiss = { 
                     showBottomSheet = false
                     editingTask = null
+                    isViewMode = false
                 },
+                onEditMode = { isViewMode = false },
                 onConfirm = { title, desc ->
                     val currentTask = editingTask
                     if (currentTask != null) {
@@ -224,7 +236,9 @@ fun EmptyState() {
 @Composable
 fun TaskBottomSheet(
     task: Task? = null,
+    isViewMode: Boolean = false,
     onDismiss: () -> Unit,
+    onEditMode: () -> Unit,
     onConfirm: (String, String) -> Unit,
     sheetState: SheetState
 ) {
@@ -254,76 +268,119 @@ fun TaskBottomSheet(
                     .padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                Text(
-                    if (task == null) "START NEW" else "EDIT TASK",
-                    style = if (task == null) {
-                        MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 2.sp,
-                            brush = Brush.linearGradient(GlossyGradient)
-                        )
-                    } else {
-                        MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 2.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                )
-                
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Task Title") },
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary,
-                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    )
-                )
-
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("Notes") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary,
-                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    )
-                )
-
-                Button(
-                    onClick = { if (title.isNotBlank()) onConfirm(title, description) },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = title.isNotBlank(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
-                    ),
-                    shape = MaterialTheme.shapes.medium,
-                    contentPadding = PaddingValues(16.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        if (task == null) "START" else "SAVE",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 2.sp,
-                            color = Color.White
+                        if (task == null) "START NEW" else if (isViewMode) "TASK DETAILS" else "EDIT TASK",
+                        style = if (task == null || isViewMode) {
+                            MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 2.sp,
+                                brush = Brush.linearGradient(GlossyGradient)
+                            )
+                        } else {
+                            MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 2.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    )
+                    
+                    if (isViewMode) {
+                        IconButton(onClick = onEditMode) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
+                
+                if (isViewMode) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        if (description.isNotEmpty()) {
+                            Text(
+                                text = description,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
+                    
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.medium,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("CLOSE", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                    }
+                } else {
+                    OutlinedTextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        label = { Text("Task Title") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.medium,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         )
                     )
+
+                    OutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        label = { Text("Notes") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.medium,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        )
+                    )
+
+                    Button(
+                        onClick = { if (title.isNotBlank()) onConfirm(title, description) },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = title.isNotBlank(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                        ),
+                        shape = MaterialTheme.shapes.medium,
+                        contentPadding = PaddingValues(16.dp)
+                    ) {
+                        Text(
+                            if (task == null) "START" else "SAVE",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 2.sp,
+                                color = Color.White
+                            )
+                        )
+                    }
                 }
             }
         }
