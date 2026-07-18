@@ -24,7 +24,7 @@ import dev.bimbok.start.data.local.dao.TaskWithSubtasksAndTags
 fun TaskItem(
     taskWithSubtasksAndTags: TaskWithSubtasksAndTags,
     onToggleCompletion: (Boolean) -> Unit,
-    onDelete: () -> Unit,
+    onDeleteRequest: () -> Unit,
     onEdit: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -33,11 +33,18 @@ fun TaskItem(
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
             if (it == SwipeToDismissBoxValue.EndToStart) {
-                onDelete()
-                true
+                onDeleteRequest()
+                false // Wait for dialog confirmation
             } else false
         }
     )
+
+    // Reset swipe state if dialog is cancelled
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
+            dismissState.reset()
+        }
+    }
 
     SwipeToDismissBox(
         state = dismissState,
@@ -91,7 +98,7 @@ fun TaskItem(
                 Checkbox(
                     checked = task.isCompleted,
                     onCheckedChange = onToggleCompletion,
-                    modifier = Modifier.scale(1.2f), // Scaled up for satisfaction
+                    modifier = Modifier.scale(1.2f),
                     colors = CheckboxDefaults.colors(
                         checkedColor = MaterialTheme.colorScheme.primary,
                         uncheckedColor = MaterialTheme.colorScheme.outline
@@ -104,7 +111,7 @@ fun TaskItem(
                     Text(
                         text = task.title,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Black, // Bold geometric feel
+                        fontWeight = FontWeight.Black,
                         textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null,
                         color = if (task.isCompleted) 
                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f) 
@@ -113,7 +120,7 @@ fun TaskItem(
                     if (task.description.isNotEmpty()) {
                         Text(
                             text = task.description,
-                            style = MaterialTheme.typography.bodySmall, // Recedes into background
+                            style = MaterialTheme.typography.bodySmall,
                             maxLines = 2,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                         )
@@ -124,7 +131,7 @@ fun TaskItem(
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Edit Task",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f), // Subtle grey
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -132,4 +139,3 @@ fun TaskItem(
         }
     }
 }
-

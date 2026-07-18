@@ -19,8 +19,8 @@ import dev.bimbok.start.ui.components.FloatingNavigationBar
 import dev.bimbok.start.ui.navigation.Screen
 import dev.bimbok.start.ui.settings.SettingsScreen
 import dev.bimbok.start.ui.tags.TagsScreen
-import dev.bimbok.start.ui.theme.GlossyGradient
-import dev.bimbok.start.ui.theme.GlossyGradientCyan
+import dev.bimbok.start.ui.theme.getDynamicGradient
+import dev.bimbok.start.ui.theme.getDynamicSecondaryGradient
 import dev.bimbok.start.ui.todo.TodoScreen
 
 @Composable
@@ -28,6 +28,10 @@ fun MainScreen() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    // Theme-aware gradients for background blobs
+    val primaryGradient = getDynamicGradient()
+    val secondaryGradient = getDynamicSecondaryGradient()
 
     // Background Animation (Global)
     val infiniteTransition = rememberInfiniteTransition(label = "background")
@@ -55,13 +59,13 @@ fun MainScreen() {
         color = MaterialTheme.colorScheme.background
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Global Decorative Background Blobs
+            // Global Dynamic Decorative Background Blobs
             Canvas(modifier = Modifier.fillMaxSize().blur(150.dp)) {
-                val dimmedGradient = GlossyGradient.map { it.copy(alpha = 0.1f) }
-                val dimmedGradientCyan = GlossyGradientCyan.map { it.copy(alpha = 0.1f) }
+                val dimmedPrimary = primaryGradient.map { it.copy(alpha = 0.15f) }
+                val dimmedSecondary = secondaryGradient.map { it.copy(alpha = 0.15f) }
 
                 drawCircle(
-                    brush = Brush.radialGradient(dimmedGradient),
+                    brush = Brush.radialGradient(dimmedPrimary),
                     radius = size.width * 1.5f,
                     center = center.copy(
                         x = size.width * (0.2f + 0.15f * xOffset),
@@ -69,7 +73,7 @@ fun MainScreen() {
                     )
                 )
                 drawCircle(
-                    brush = Brush.radialGradient(dimmedGradientCyan),
+                    brush = Brush.radialGradient(dimmedSecondary),
                     radius = size.width * 1.2f,
                     center = center.copy(
                         x = size.width * (0.8f - 0.15f * xOffset),
@@ -136,4 +140,3 @@ fun MainScreen() {
         }
     }
 }
-

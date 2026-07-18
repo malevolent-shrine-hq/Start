@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import dev.bimbok.start.ui.navigation.navItems
-import dev.bimbok.start.ui.theme.GlossyGradient
 
 @Composable
 fun FloatingNavigationBar(

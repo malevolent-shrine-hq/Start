@@ -34,7 +34,7 @@ import dev.bimbok.start.R
 import dev.bimbok.start.data.local.entities.Task
 import dev.bimbok.start.ui.components.ShimmerItem
 import dev.bimbok.start.ui.components.TaskItem
-import dev.bimbok.start.ui.theme.GlossyGradient
+import dev.bimbok.start.ui.theme.getDynamicGradient
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,7 +49,36 @@ fun TodoScreen(
     var editingTask by remember { mutableStateOf<Task?>(null) }
     var isViewMode by remember { mutableStateOf(false) }
     
+    var taskToDelete by remember { mutableStateOf<Task?>(null) }
+
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+    if (taskToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { taskToDelete = null },
+            title = { Text("DELETE TASK", fontWeight = FontWeight.Black) },
+            text = { Text("Are you sure you want to delete '${taskToDelete?.title}'?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        taskToDelete?.let { viewModel.deleteTask(it) }
+                        taskToDelete = null
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("DELETE", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { taskToDelete = null }) {
+                    Text("CANCEL")
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            shape = MaterialTheme.shapes.large
+        )
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -67,7 +96,7 @@ fun TodoScreen(
                                 fontWeight = FontWeight.Black,
                                 fontSize = 42.sp,
                                 letterSpacing = 4.sp,
-                                brush = Brush.linearGradient(GlossyGradient)
+                                brush = Brush.linearGradient(getDynamicGradient())
                             )
                         )
                     },
@@ -126,9 +155,8 @@ fun TodoScreen(
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             viewModel.toggleTaskCompletion(taskWithTags.task, it) 
                                         },
-                                        onDelete = { 
-                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                            viewModel.deleteTask(taskWithTags.task) 
+                                        onDeleteRequest = { 
+                                            taskToDelete = taskWithTags.task
                                         },
                                         onEdit = { 
                                             editingTask = taskWithTags.task
@@ -162,7 +190,7 @@ fun TodoScreen(
                         .padding(end = 24.dp, bottom = 120.dp)
                         .size(64.dp),
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.secondary, // Soft terminal yellow
+                    color = MaterialTheme.colorScheme.secondary, 
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.2f)),
                     shadowElevation = 12.dp
                 ) {
@@ -219,7 +247,7 @@ fun EmptyState() {
             style = MaterialTheme.typography.displaySmall.copy(
                 fontWeight = FontWeight.Black,
                 letterSpacing = 2.sp,
-                brush = Brush.linearGradient(GlossyGradient)
+                brush = Brush.linearGradient(getDynamicGradient())
             )
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -279,7 +307,7 @@ fun TaskBottomSheet(
                             MaterialTheme.typography.headlineMedium.copy(
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 2.sp,
-                                brush = Brush.linearGradient(GlossyGradient)
+                                brush = Brush.linearGradient(getDynamicGradient())
                             )
                         } else {
                             MaterialTheme.typography.headlineMedium.copy(

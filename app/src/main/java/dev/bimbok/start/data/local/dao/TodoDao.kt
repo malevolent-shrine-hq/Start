@@ -54,9 +54,45 @@ interface TodoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTag(tag: Tag): Long
 
+    @Delete
+    suspend fun deleteTag(tag: Tag)
+
+    @Query("SELECT * FROM tags ORDER BY name ASC")
+    fun getAllTags(): kotlinx.coroutines.flow.Flow<List<Tag>>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertTaskTagCrossRef(crossRef: TaskTagCrossRef)
 
     @Query("DELETE FROM task_tag_cross_ref WHERE taskId = :taskId")
     suspend fun deleteTagsForTask(taskId: Long)
+
+    @Query("DELETE FROM tasks")
+    suspend fun deleteAllTasks()
+
+    @Query("DELETE FROM tags")
+    suspend fun deleteAllTags()
+
+    @Query("SELECT * FROM tasks")
+    suspend fun getAllTasksDirect(): List<Task>
+
+    @Query("SELECT * FROM tags")
+    suspend fun getAllTagsDirect(): List<Tag>
+
+    @Query("SELECT * FROM subtasks")
+    suspend fun getAllSubTasksDirect(): List<SubTask>
+
+    @Query("SELECT * FROM task_tag_cross_ref")
+    suspend fun getAllCrossRefsDirect(): List<TaskTagCrossRef>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTasks(tasks: List<Task>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTags(tags: List<Tag>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSubTasks(subTasks: List<SubTask>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCrossRefs(crossRefs: List<TaskTagCrossRef>)
 }
