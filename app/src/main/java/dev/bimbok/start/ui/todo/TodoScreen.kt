@@ -5,6 +5,8 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,6 +24,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -30,7 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import dev.bimbok.start.R
 import dev.bimbok.start.data.local.entities.Task
 import dev.bimbok.start.ui.components.ShimmerItem
 import dev.bimbok.start.ui.components.TaskItem
@@ -90,15 +92,42 @@ fun TodoScreen(
             topBar = {
                 CenterAlignedTopAppBar(
                     title = { 
-                        Text(
-                            "START",
-                            style = MaterialTheme.typography.displayLarge.copy(
-                                fontWeight = FontWeight.Black,
-                                fontSize = 42.sp,
-                                letterSpacing = 4.sp,
-                                brush = Brush.linearGradient(getDynamicGradient())
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                "START",
+                                style = MaterialTheme.typography.displayLarge.copy(
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 42.sp,
+                                    letterSpacing = 4.sp,
+                                    brush = Brush.linearGradient(getDynamicGradient())
+                                )
                             )
-                        )
+                            
+                            // Progress Tracker
+                            if (uiState is TodoUiState.Success) {
+                                val tasks = (uiState as TodoUiState.Success).tasks
+                                if (tasks.isNotEmpty()) {
+                                    val completed = tasks.count { it.task.isCompleted }
+                                    val progress = completed.toFloat() / tasks.size
+                                    
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(top = 4.dp)
+                                            .width(80.dp)
+                                            .height(3.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth(progress)
+                                                .fillMaxHeight()
+                                                .background(Brush.linearGradient(getDynamicGradient()))
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     },
                     scrollBehavior = scrollBehavior,
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -130,7 +159,11 @@ fun TodoScreen(
                     }
                     is TodoUiState.Success -> {
                         if (state.tasks.isEmpty()) {
-                            EmptyState()
+                            EmptyState(onAddClick = {
+                                editingTask = null
+                                isViewMode = false
+                                showBottomSheet = true
+                            })
                         } else {
                             LazyColumn(
                                 state = listState,
@@ -156,7 +189,7 @@ fun TodoScreen(
                                             viewModel.toggleTaskCompletion(taskWithTags.task, it) 
                                         },
                                         onDeleteRequest = { 
-                                            taskToDelete = taskWithTags.task
+                                            taskToDelete = taskWithTags.task 
                                         },
                                         onEdit = { 
                                             editingTask = taskWithTags.task
@@ -236,14 +269,33 @@ fun TodoScreen(
 }
 
 @Composable
-fun EmptyState() {
+fun EmptyState(onAddClick: () -> Unit) {
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "scale"
+    )
+
     Column(
-        Modifier.fillMaxSize().padding(horizontal = 32.dp),
+        Modifier
+            .fillMaxSize()
+            .padding(horizontal = 32.dp)
+            .clickable(
+                onClick = onAddClick, 
+                indication = null, 
+                interactionSource = remember { MutableInteractionSource() }
+            ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             "NO TASKS FOUND",
+            modifier = Modifier.graphicsLayer(scaleX = scale, scaleY = scale),
             style = MaterialTheme.typography.displaySmall.copy(
                 fontWeight = FontWeight.Black,
                 letterSpacing = 2.sp,
@@ -252,10 +304,11 @@ fun EmptyState() {
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            "Tap + to begin your journey.",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            fontWeight = FontWeight.Medium
+            "TAP TO START YOUR JOURNEY",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp
         )
     }
 }
