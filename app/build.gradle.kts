@@ -70,6 +70,9 @@ dependencies {
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.2")
 
+    // WorkManager for notifications
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

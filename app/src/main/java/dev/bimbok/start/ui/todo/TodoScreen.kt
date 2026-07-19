@@ -1,9 +1,10 @@
 package dev.bimbok.start.ui.todo
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,9 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,8 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,6 +36,8 @@ import dev.bimbok.start.data.local.entities.Task
 import dev.bimbok.start.ui.components.ShimmerItem
 import dev.bimbok.start.ui.components.TaskItem
 import dev.bimbok.start.ui.theme.getDynamicGradient
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -252,12 +253,12 @@ fun TodoScreen(
                     isViewMode = false
                 },
                 onEditMode = { isViewMode = false },
-                onConfirm = { title, desc ->
+                onConfirm = { title, desc, dueDate ->
                     val currentTask = editingTask
                     if (currentTask != null) {
-                        viewModel.updateTask(currentTask, title, desc)
+                        viewModel.updateTask(currentTask, title, desc, dueDate)
                     } else {
-                        viewModel.addTask(title, desc)
+                        viewModel.addTask(title, desc, dueDate)
                     }
                     showBottomSheet = false
                     editingTask = null
@@ -320,11 +321,44 @@ fun TaskBottomSheet(
     isViewMode: Boolean = false,
     onDismiss: () -> Unit,
     onEditMode: () -> Unit,
-    onConfirm: (String, String) -> Unit,
+    onConfirm: (String, String, Long?) -> Unit,
     sheetState: SheetState
 ) {
+    val context = LocalContext.current
     var title by remember(task) { mutableStateOf(task?.title ?: "") }
     var description by remember(task) { mutableStateOf(task?.description ?: "") }
+    var dueDate by remember(task) { mutableStateOf(task?.dueDate) }
+
+    val dateFormatter = remember { SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()) }
+
+    fun showDateTimePicker() {
+        val calendar = Calendar.getInstance()
+        dueDate?.let { calendar.timeInMillis = it }
+        
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                calendar.set(Calendar.YEAR, year)
+                calendar.set(Calendar.MONTH, month)
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                
+                TimePickerDialog(
+                    context,
+                    { _, hourOfDay, minute ->
+                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                        calendar.set(Calendar.MINUTE, minute)
+                        dueDate = calendar.timeInMillis
+                    },
+                    calendar.get(Calendar.HOUR_OF_DAY),
+                    calendar.get(Calendar.MINUTE),
+                    false
+                ).show()
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -392,6 +426,17 @@ fun TaskBottomSheet(
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                             )
                         }
+                        dueDate?.let {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Schedule, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = "REMINDER: ${dateFormatter.format(it)}",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
                     }
                     
                     Button(
@@ -440,8 +485,36 @@ fun TaskBottomSheet(
                         )
                     )
 
+                    // Date Time Picker Button
+                    Surface(
+                        onClick = { showDateTimePicker() },
+                        shape = MaterialTheme.shapes.medium,
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Notifications, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.width(12.dp))
+                            Text(
+                                text = if (dueDate == null) "SET REMINDER" else dateFormatter.format(dueDate!!),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = if (dueDate == null) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(Modifier.weight(1f))
+                            if (dueDate != null) {
+                                IconButton(onClick = { dueDate = null }, modifier = Modifier.size(24.dp)) {
+                                    Icon(Icons.Default.Close, contentDescription = "Clear", modifier = Modifier.size(16.dp))
+                                }
+                            }
+                        }
+                    }
+
                     Button(
-                        onClick = { if (title.isNotBlank()) onConfirm(title, description) },
+                        onClick = { if (title.isNotBlank()) onConfirm(title, description, dueDate) },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = title.isNotBlank(),
                         colors = ButtonDefaults.buttonColors(

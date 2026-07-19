@@ -18,4 +18,10 @@ object AppModule {
     fun provideSettingsManager(@ApplicationContext context: Context): SettingsManager {
         return SettingsManager(context)
     }
+
+    @Provides
+    @Singleton
+    fun provideNotificationHelper(@ApplicationContext context: Context): dev.bimbok.start.notifications.NotificationHelper {
+        return dev.bimbok.start.notifications.NotificationHelper(context)
+    }
 }

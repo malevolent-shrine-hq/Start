@@ -41,6 +41,13 @@ class SettingsViewModel @Inject constructor(
             initialValue = AppTheme.GRUVBOX
         )
 
+    val notificationsEnabled: StateFlow<Boolean> = settingsManager.notificationsEnabled
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = true
+        )
+
     fun clearAllData() {
         viewModelScope.launch {
             repository.deleteAllData()
@@ -50,6 +57,12 @@ class SettingsViewModel @Inject constructor(
     fun setTheme(theme: AppTheme) {
         viewModelScope.launch {
             settingsManager.setTheme(theme)
+        }
+    }
+
+    fun setNotificationsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsManager.setNotificationsEnabled(enabled)
         }
     }
 
