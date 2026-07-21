@@ -176,7 +176,7 @@ fun TodoScreen(
                                 ),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                items(state.tasks, key = { it.task.id }) { taskWithTags ->
+                                items(state.tasks, key = { it.task.id }) { taskWithSubtasks ->
                                     TaskItem(
                                         modifier = Modifier.animateItem(
                                             placementSpec = spring(
@@ -184,21 +184,21 @@ fun TodoScreen(
                                                 stiffness = Spring.StiffnessLow
                                             )
                                         ),
-                                        taskWithSubtasksAndTags = taskWithTags,
+                                        taskWithSubtasks = taskWithSubtasks,
                                         onToggleCompletion = { 
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            viewModel.toggleTaskCompletion(taskWithTags.task, it) 
+                                            viewModel.toggleTaskCompletion(taskWithSubtasks.task, it) 
                                         },
                                         onDeleteRequest = { 
-                                            taskToDelete = taskWithTags.task 
+                                            taskToDelete = taskWithSubtasks.task 
                                         },
                                         onEdit = { 
-                                            editingTask = taskWithTags.task
+                                            editingTask = taskWithSubtasks.task
                                             isViewMode = false
                                             showBottomSheet = true
                                         },
                                         onClick = { 
-                                            editingTask = taskWithTags.task
+                                            editingTask = taskWithSubtasks.task
                                             isViewMode = true
                                             showBottomSheet = true
                                         }
@@ -391,13 +391,13 @@ fun TaskBottomSheet(
                     Text(
                         if (task == null) "START NEW" else if (isViewMode) "TASK DETAILS" else "EDIT TASK",
                         style = if (task == null || isViewMode) {
-                            MaterialTheme.typography.headlineMedium.copy(
+                            MaterialTheme.typography.headlineSmall.copy(
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 2.sp,
                                 brush = Brush.linearGradient(getDynamicGradient())
                             )
                         } else {
-                            MaterialTheme.typography.headlineMedium.copy(
+                            MaterialTheme.typography.headlineSmall.copy(
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 2.sp,
                                 color = MaterialTheme.colorScheme.onSurface

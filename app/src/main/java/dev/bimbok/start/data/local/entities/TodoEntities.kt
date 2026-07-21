@@ -40,23 +40,11 @@ data class SubTask(
     val isCompleted: Boolean = false
 )
 
-@Entity(tableName = "tags")
-data class Tag(
+@Entity(tableName = "notes")
+data class Note(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val name: String,
-    val color: Int // Color as Int
-)
-
-@Entity(
-    tableName = "task_tag_cross_ref",
-    primaryKeys = ["taskId", "tagId"],
-    foreignKeys = [
-        ForeignKey(entity = Task::class, parentColumns = ["id"], childColumns = ["taskId"], onDelete = ForeignKey.CASCADE),
-        ForeignKey(entity = Tag::class, parentColumns = ["id"], childColumns = ["tagId"], onDelete = ForeignKey.CASCADE)
-    ],
-    indices = [Index("tagId")]
-)
-data class TaskTagCrossRef(
-    val taskId: Long,
-    val tagId: Long
+    val title: String,
+    val content: String,
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
 )

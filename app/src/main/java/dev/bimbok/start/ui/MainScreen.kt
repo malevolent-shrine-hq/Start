@@ -17,8 +17,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dev.bimbok.start.ui.components.FloatingNavigationBar
 import dev.bimbok.start.ui.navigation.Screen
+import dev.bimbok.start.ui.notes.NotesScreen
 import dev.bimbok.start.ui.settings.SettingsScreen
-import dev.bimbok.start.ui.tags.TagsScreen
 import dev.bimbok.start.ui.theme.getDynamicGradient
 import dev.bimbok.start.ui.theme.getDynamicSecondaryGradient
 import dev.bimbok.start.ui.todo.TodoScreen
@@ -114,8 +114,8 @@ fun MainScreen() {
                 composable(Screen.Tasks.route) {
                     TodoScreen()
                 }
-                composable(Screen.Tags.route) {
-                    TagsScreen()
+                composable(Screen.Notes.route) {
+                    NotesScreen()
                 }
                 composable(Screen.Settings.route) {
                     SettingsScreen()

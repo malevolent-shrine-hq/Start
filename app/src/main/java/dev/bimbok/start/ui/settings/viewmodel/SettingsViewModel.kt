@@ -5,17 +5,15 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.bimbok.start.data.local.entities.Note
 import dev.bimbok.start.data.local.entities.Priority
 import dev.bimbok.start.data.local.entities.SubTask
-import dev.bimbok.start.data.local.entities.Tag
 import dev.bimbok.start.data.local.entities.Task
-import dev.bimbok.start.data.local.entities.TaskTagCrossRef
 import dev.bimbok.start.data.local.models.AppTheme
 import dev.bimbok.start.data.local.models.BackupData
+import dev.bimbok.start.data.local.models.BackupNote
 import dev.bimbok.start.data.local.models.BackupSubTask
-import dev.bimbok.start.data.local.models.BackupTag
 import dev.bimbok.start.data.local.models.BackupTask
-import dev.bimbok.start.data.local.models.BackupTaskTagCrossRef
 import dev.bimbok.start.data.preferences.SettingsManager
 import dev.bimbok.start.data.repository.TodoRepository
 import kotlinx.coroutines.Dispatchers
@@ -72,11 +70,10 @@ class SettingsViewModel @Inject constructor(
                 val tasks = repository.getAllTasksDirect().map { 
                     BackupTask(it.id, it.title, it.description, it.priority.name, it.dueDate, it.isCompleted, it.createdAt, it.updatedAt) 
                 }
-                val tags = repository.getAllTagsDirect().map { BackupTag(it.id, it.name, it.color) }
+                val notes = repository.getAllNotesDirect().map { BackupNote(it.id, it.title, it.content, it.createdAt, it.updatedAt) }
                 val subTasks = repository.getAllSubTasksDirect().map { BackupSubTask(it.id, it.taskId, it.title, it.isCompleted) }
-                val crossRefs = repository.getAllCrossRefsDirect().map { BackupTaskTagCrossRef(it.taskId, it.tagId) }
 
-                val backup = BackupData(tasks, tags, subTasks, crossRefs)
+                val backup = BackupData(tasks, notes, subTasks)
                 val json = Json.encodeToString(backup)
 
                 withContext(Dispatchers.IO) {
@@ -101,13 +98,12 @@ class SettingsViewModel @Inject constructor(
                 val backup = Json.decodeFromString<BackupData>(json)
 
                 val tasks = backup.tasks.map { 
-                    Task(it.id, it.title, it.description, Priority.valueOf(it.priority), it.dueDate, it.isCompleted, it.createdAt, it.updatedAt)
+                    Task(it.id, it.title, it.description, Priority.valueOf(it.priority), it.dueDate, it.isCompleted, it.createdAt, it.updatedAt) 
                 }
-                val tags = backup.tags.map { Tag(it.id, it.name, it.color) }
+                val notes = backup.notes.map { Note(it.id, it.title, it.content, it.createdAt, it.updatedAt) }
                 val subTasks = backup.subTasks.map { SubTask(it.id, it.taskId, it.title, it.isCompleted) }
-                val crossRefs = backup.taskTagCrossRefs.map { TaskTagCrossRef(it.taskId, it.tagId) }
 
-                repository.restoreData(tasks, tags, subTasks, crossRefs)
+                repository.restoreData(tasks, notes, subTasks)
                 onSuccess()
             } catch (e: Exception) {
                 onError(e.message ?: "Unknown error")

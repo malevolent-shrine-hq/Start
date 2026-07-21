@@ -3,7 +3,7 @@ package dev.bimbok.start.ui.todo
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.bimbok.start.data.local.dao.TaskWithSubtasksAndTags
+import dev.bimbok.start.data.local.dao.TaskWithSubtasks
 import dev.bimbok.start.data.local.entities.Priority
 import dev.bimbok.start.data.local.entities.Task
 import dev.bimbok.start.data.repository.TodoRepository
@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 sealed interface TodoUiState {
     object Loading : TodoUiState
-    data class Success(val tasks: List<TaskWithSubtasksAndTags>) : TodoUiState
+    data class Success(val tasks: List<TaskWithSubtasks>) : TodoUiState
     data class Error(val message: String) : TodoUiState
 }
 

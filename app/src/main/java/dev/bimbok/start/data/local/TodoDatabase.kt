@@ -7,7 +7,7 @@ import dev.bimbok.start.data.local.dao.TodoDao
 import dev.bimbok.start.data.local.entities.*
 
 @Database(
-    entities = [Task::class, SubTask::class, Tag::class, TaskTagCrossRef::class],
+    entities = [Task::class, SubTask::class, Note::class],
     version = 1,
     exportSchema = false
 )

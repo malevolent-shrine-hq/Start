@@ -1,11 +1,10 @@
 package dev.bimbok.start.data.repository
 
 import dev.bimbok.start.data.local.dao.TodoDao
-import dev.bimbok.start.data.local.dao.TaskWithSubtasksAndTags
+import dev.bimbok.start.data.local.dao.TaskWithSubtasks
 import dev.bimbok.start.data.local.entities.Task
 import dev.bimbok.start.data.local.entities.SubTask
-import dev.bimbok.start.data.local.entities.Tag
-import dev.bimbok.start.data.local.entities.TaskTagCrossRef
+import dev.bimbok.start.data.local.entities.Note
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,9 +13,9 @@ import javax.inject.Singleton
 class TodoRepository @Inject constructor(
     private val todoDao: TodoDao
 ) {
-    val allTasks: Flow<List<TaskWithSubtasksAndTags>> = todoDao.getAllTasks()
+    val allTasks: Flow<List<TaskWithSubtasks>> = todoDao.getAllTasks()
 
-    fun getTaskById(taskId: Long): Flow<TaskWithSubtasksAndTags?> = todoDao.getTaskById(taskId)
+    fun getTaskById(taskId: Long): Flow<TaskWithSubtasks?> = todoDao.getTaskById(taskId)
 
     suspend fun insertTask(task: Task) = todoDao.insertTask(task)
 
@@ -30,32 +29,29 @@ class TodoRepository @Inject constructor(
 
     suspend fun deleteSubTask(subTask: SubTask) = todoDao.deleteSubTask(subTask)
 
-    suspend fun insertTag(tag: Tag) = todoDao.insertTag(tag)
-
-    suspend fun deleteTag(tag: Tag) = todoDao.deleteTag(tag)
-
-    val allTags: Flow<List<Tag>> = todoDao.getAllTags()
-
-    suspend fun addTagToTask(taskId: Long, tagId: Long) {
-        todoDao.insertTaskTagCrossRef(TaskTagCrossRef(taskId, tagId))
-    }
+    // Notes
+    val allNotes: Flow<List<Note>> = todoDao.getAllNotes()
+    
+    suspend fun insertNote(note: Note) = todoDao.insertNote(note)
+    
+    suspend fun updateNote(note: Note) = todoDao.updateNote(note)
+    
+    suspend fun deleteNote(note: Note) = todoDao.deleteNote(note)
 
     suspend fun deleteAllData() {
         todoDao.deleteAllTasks()
-        todoDao.deleteAllTags()
+        todoDao.deleteAllNotes()
     }
 
     suspend fun getAllTasksDirect() = todoDao.getAllTasksDirect()
-    suspend fun getAllTagsDirect() = todoDao.getAllTagsDirect()
+    suspend fun getAllNotesDirect() = todoDao.getAllNotesDirect()
     suspend fun getAllSubTasksDirect() = todoDao.getAllSubTasksDirect()
-    suspend fun getAllCrossRefsDirect() = todoDao.getAllCrossRefsDirect()
 
-    suspend fun restoreData(tasks: List<Task>, tags: List<Tag>, subTasks: List<SubTask>, crossRefs: List<TaskTagCrossRef>) {
+    suspend fun restoreData(tasks: List<Task>, notes: List<Note>, subTasks: List<SubTask>) {
         todoDao.deleteAllTasks()
-        todoDao.deleteAllTags()
+        todoDao.deleteAllNotes()
         todoDao.insertTasks(tasks)
-        todoDao.insertTags(tags)
+        todoDao.insertNotes(notes)
         todoDao.insertSubTasks(subTasks)
-        todoDao.insertCrossRefs(crossRefs)
     }
 }

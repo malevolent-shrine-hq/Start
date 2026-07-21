@@ -17,19 +17,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import dev.bimbok.start.data.local.dao.TaskWithSubtasksAndTags
+import dev.bimbok.start.data.local.dao.TaskWithSubtasks
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskItem(
-    taskWithSubtasksAndTags: TaskWithSubtasksAndTags,
+    taskWithSubtasks: TaskWithSubtasks,
     onToggleCompletion: (Boolean) -> Unit,
     onDeleteRequest: () -> Unit,
     onEdit: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val task = taskWithSubtasksAndTags.task
+    val task = taskWithSubtasks.task
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
             if (it == SwipeToDismissBoxValue.EndToStart) {

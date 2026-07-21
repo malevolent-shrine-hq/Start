@@ -5,9 +5,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BackupData(
     val tasks: List<BackupTask>,
-    val tags: List<BackupTag>,
-    val subTasks: List<BackupSubTask>,
-    val taskTagCrossRefs: List<BackupTaskTagCrossRef>
+    val notes: List<BackupNote>,
+    val subTasks: List<BackupSubTask>
 )
 
 @Serializable
@@ -23,10 +22,12 @@ data class BackupTask(
 )
 
 @Serializable
-data class BackupTag(
+data class BackupNote(
     val id: Long,
-    val name: String,
-    val color: Int
+    val title: String,
+    val content: String,
+    val createdAt: Long,
+    val updatedAt: Long
 )
 
 @Serializable
@@ -35,10 +36,4 @@ data class BackupSubTask(
     val taskId: Long,
     val title: String,
     val isCompleted: Boolean
-)
-
-@Serializable
-data class BackupTaskTagCrossRef(
-    val taskId: Long,
-    val tagId: Long
 )

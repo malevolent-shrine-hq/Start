@@ -68,7 +68,7 @@ fun SettingsScreen(
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
             title = { Text("CLEAR ALL DATA", fontWeight = FontWeight.Black) },
-            text = { Text("This will permanently delete all your tasks and tags. This action cannot be undone.") },
+            text = { Text("This will permanently delete all your tasks and notes. This action cannot be undone.") },
             confirmButton = {
                 TextButton(
                     onClick = {
